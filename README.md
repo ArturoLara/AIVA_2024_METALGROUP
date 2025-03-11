@@ -85,7 +85,7 @@ print("Defectos detectados:", resultado)
 Se ha configurado un conjunto de pruebas unitarias que aseguran una cobertura mínima del 80 % del código fuente. Puedes ejecutar las pruebas con:
 
 ```bash
-pytest --maxfail=1 --disable-warnings -q
+python -m unittest discover 
 ```
 
 - **Validación de rendimiento:**
