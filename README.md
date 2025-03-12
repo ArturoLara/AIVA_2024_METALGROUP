@@ -7,10 +7,7 @@ Este proyecto implementa un sistema de visión artificial diseñado para la insp
 - **Procesamiento de imágenes**
 Corrige la iluminación y reduce el ruido de imágenes en escala de grises de 200x200 píxeles.
 - **Detección de defectos**
-
-Identifica hasta 5 defectos por imagen, devolviendo una lista de tuplas con las coordenadas y dimensiones del bounding box. En ausencia de defectos se devuelve la tupla $$
-(0,0,0,0)
-$$.
+Identifica hasta 5 defectos por imagen, devolviendo una lista de tuplas con las coordenadas y dimensiones del bounding box. En ausencia de defectos se devuelve la tupla (0,0,0,0).
 - **Rendimiento y precisión**
     - Tiempo máximo de procesamiento: 200 ms por imagen.
     - Precisión mínima del 90 % medida en F1-score, usando un umbral de 80 % en la IoU (Intersection over Union).
