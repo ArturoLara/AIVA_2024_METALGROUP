@@ -60,9 +60,7 @@ El proyecto se organiza de manera modular para facilitar su integración. A modo
 - **Procesado de imágenes:**
 Ejecuta el módulo de preprocesamiento proporcionando la ruta de la imagen (200x200 píxeles). El sistema devolverá una imagen optimizada para el análisis.
 - **Detección de defectos:**
-Invoca la función principal de detección pasando la imagen preprocesada. La salida será una lista de tuplas con la información de cada defecto detectado o $$
-[(0,0,0,0)]
-$$ en caso de no haber defectos.
+Invoca la función principal de detección pasando la imagen preprocesada. La salida será una lista de tuplas con la información de cada defecto detectado o (0,0,0,0) en caso de no haber defectos.
 
 Ejemplo básico en Python:
 
