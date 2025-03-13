@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from aiva import defect_detector
+from metal import defect_detector
 
 
 class TestDefectDetector(unittest.TestCase):
