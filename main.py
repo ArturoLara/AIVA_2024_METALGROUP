@@ -1,19 +1,16 @@
-import sys
-from metal import preprocessing
-from metal import defect_detector as detector
+import argparse
+from metal.manager import MainManager
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <image_path>")
-        sys.exit(1)
-    image_path = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Sistema de análisis de imágenes para detectar imperfecciones.")
+    parser.add_argument("--config", required=True, help="Ruta al archivo de configuración JSON.")
+    parser.add_argument("--image", required=True, help="Ruta a la imagen a analizar.")
 
-    processed_image = preprocessing.process_image(image_path)
-    defects = detector.detect_defects(processed_image)
+    args = parser.parse_args()
 
-    print("Processed image shape:", processed_image.shape)
-    print("Detected defects:", defects)
+    manager = MainManager(config_path=args.config, image_path=args.image)
+    manager.start()
 
 
 if __name__ == "__main__":

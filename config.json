@@ -1,0 +1,6 @@
+{
+    "preprocessing_methods": [
+        "ExamplePreprocessingMethod"
+    ],
+    "detector_methods": "ExampleDetectionMethod"
+}
