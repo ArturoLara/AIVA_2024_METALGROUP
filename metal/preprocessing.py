@@ -8,13 +8,6 @@ class PreprocessingMethod(ABC):
         """Método abstracto que debe implementar cada método de preprocesado"""
         pass
 
-class ExamplePreprocessingMethod(PreprocessingMethod):
-    def process(self, image):
-        """Ejemplo de implementación de un método de preprocesado"""
-        print("Procesando imagen con ExamplePreprocessingMethod")
-        processed_image = np.zeros((200, 200), dtype=np.uint8)
-        return processed_image
-
 class UmbralizeMethod(PreprocessingMethod):
     def process(self, image):
         print("Procesando imagen con UmbralizeMethod")

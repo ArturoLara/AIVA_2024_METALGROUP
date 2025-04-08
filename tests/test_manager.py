@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import numpy as np
-from metal.preprocessing import PreprocessingManager, ExamplePreprocessingMethod, UmbralizeMethod, CannyMethod
-from metal.detection import DetectorManager, ExampleDetectionMethod, ContrastMethod
+from metal.preprocessing import PreprocessingManager, UmbralizeMethod, CannyMethod
+from metal.detection import DetectorManager, ContrastMethod
 from metal.tools import Tools
 from metal.manager import MainManager
 
