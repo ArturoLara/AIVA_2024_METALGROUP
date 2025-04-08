@@ -1,6 +1,7 @@
 {
     "preprocessing_methods": [
-        "ExamplePreprocessingMethod"
+        "UmbralizeMethod",
+        "CannyMethod"
     ],
-    "detector_methods": "ExampleDetectionMethod"
+    "detector_methods": "ContrastMethod"
 }
