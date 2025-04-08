@@ -1,6 +1,7 @@
 import unittest
+import cv2
 import numpy as np
-from metal import defect_detector
+from metal.detection import ExampleDetectionMethod, DetectorManager, ContrastMethod, DetectionResult
 
 
 class TestDefectDetector(unittest.TestCase):
@@ -8,14 +9,14 @@ class TestDefectDetector(unittest.TestCase):
     def test_detect_defects_no_defects(self):
         # Se crea una imagen dummy compuesta solo por ceros
         dummy_image = np.zeros((200, 200), dtype=np.uint8)
-        defects = defect_detector.detect_defects(dummy_image)
+        defects = DetectorManager(ExampleDetectionMethod()).execute(dummy_image)
         # Debe retornar [(0,0,0,0)] indicando que no se detectaron defectos.
         self.assertEqual(defects, [(0, 0, 0, 0)])
 
     def test_detect_defects_with_defect(self):
         # Se crea una imagen dummy no nula para simular la detección de defectos
         dummy_image = np.ones((200, 200), dtype=np.uint8) * 255
-        defects = defect_detector.detect_defects(dummy_image)
+        defects = DetectorManager(ExampleDetectionMethod()).execute(dummy_image)
         # Se espera que se detecte un defecto dummy con coordenadas fijas.
         self.assertIsInstance(defects, list)
         self.assertNotEqual(defects, [(0, 0, 0, 0)])
@@ -31,7 +32,7 @@ class TestDefectDetector(unittest.TestCase):
         """
         # Utilizamos una imagen dummy no nula para simular una detección real.
         dummy_image = np.ones((200, 200), dtype=np.uint8) * 255
-        defects = defect_detector.detect_defects(dummy_image)
+        defects = DetectorManager(ExampleDetectionMethod()).execute(dummy_image)
         for defect in defects:
             x, y, w, h = defect
             self.assertGreaterEqual(x, 0)
@@ -48,9 +49,64 @@ class TestDefectDetector(unittest.TestCase):
         """
         # Para este test, se utiliza una imagen dummy no nula.
         dummy_image = np.ones((200, 200), dtype=np.uint8) * 255
-        defects = defect_detector.detect_defects(dummy_image)
+        defects = DetectorManager(ExampleDetectionMethod()).execute(dummy_image)
         self.assertGreaterEqual(len(defects), 1)
         self.assertLessEqual(len(defects), 5)
+
+    def setUp(self):
+        # Crear imágenes de prueba
+        self.black_image = np.zeros((200, 200), dtype=np.uint8)  # Imagen completamente negra
+        self.white_image = np.ones((200, 200), dtype=np.uint8) * 255  # Imagen completamente blanca
+
+        # Imagen con un rectángulo blanco en el centro
+        self.image_with_rectangle = np.zeros((200, 200), dtype=np.uint8)
+        cv2.rectangle(self.image_with_rectangle, (50, 50), (150, 150), (255), -1)
+
+    def test_contrast_method_no_contours(self):
+        method = ContrastMethod()
+        empty_result = DetectionResult(0, 0, 0, 0)  # Simular un resultado vacío
+
+        # Detectar en una imagen negra (sin contornos)
+        result = method.detect(self.black_image)
+
+        # Verificar que no se detectan contornos
+        self.assertEqual(result.px, empty_result.px)
+        self.assertEqual(result.py, empty_result.py)
+        self.assertEqual(result.height, empty_result.height)
+        self.assertEqual(result.width, empty_result.width)
+
+    def test_contrast_method_with_contours(self):
+        method = ContrastMethod()
+
+        # Detectar en una imagen con un rectángulo blanco
+        result = method.detect(self.image_with_rectangle)
+
+        # Verificar que se detecta el rectángulo blanco correctamente
+        self.assertEqual(len(result), 1)  # Solo un contorno principal
+        zona = result[0]
+
+        # Verificar las coordenadas del rectángulo detectado
+        self.assertEqual((zona.px, zona.py), (50, 50))
+        self.assertEqual((zona.width, zona.height), (101, 101))  # Incluye bordes del rectángulo
+
+    def test_detector_manager_with_example_method(self):
+        manager = DetectorManager(method=ExampleDetectionMethod())
+
+        # Ejecutar detección con el método de ejemplo en una imagen blanca
+        result = manager.execute(self.white_image)
+
+        # Verificar que se detecta el defecto simulado correctamente
+        self.assertEqual(result[0], (10, 10, 50, 50))
+
+    def test_detector_manager_with_contrast_method(self):
+        manager = DetectorManager(method=ContrastMethod())
+
+        # Ejecutar detección con el método de contraste en una imagen con un rectángulo blanco
+        result = manager.execute(self.image_with_rectangle)
+
+        # Verificar que se detecta el rectángulo correctamente
+        self.assertEqual(len(result), 1)  # Solo un contorno principal detectado
+
 
 
 if __name__ == '__main__':
