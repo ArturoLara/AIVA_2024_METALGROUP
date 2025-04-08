@@ -1,6 +1,5 @@
 import argparse
 from metal.manager import MainManager
-#from metal.detection import DetectionResult
 import cv2
 
 def dibujar_rectangulos_y_guardar(imagen_path, objetos, salida_path):
