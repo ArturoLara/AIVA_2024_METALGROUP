@@ -40,3 +40,5 @@ class MainManager:
         # Mostrar resultados (puedes personalizar esto)
         for result in results:
             print(f"Detección: x={result.px}, y={result.py}, w={result.width}, h={result.height}")
+
+        return results
