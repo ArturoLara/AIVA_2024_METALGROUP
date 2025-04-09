@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import numpy as np
-from metal.preprocessing import PreprocessingManager, ExamplePreprocessingMethod, UmbralizeMethod, CannyMethod
-from metal.detection import DetectorManager, ExampleDetectionMethod, ContrastMethod
+from metal.preprocessing import PreprocessingManager, UmbralizeMethod, CannyMethod
+from metal.detection import DetectorManager, ContrastMethod
 from metal.tools import Tools
 from metal.manager import MainManager
 
@@ -15,8 +15,8 @@ class TestMainManager(unittest.TestCase):
 
         # Mock de la configuración
         self.mock_config = {
-            "preprocessing_methods": ["ExamplePreprocessingMethod", "CannyMethod"],
-            "detector_methods": "ExampleDetectionMethod"
+            "preprocessing_methods": ["UmbralizeMethod", "CannyMethod"],
+            "detector_methods": "ContrastMethod"
         }
 
         # Mock de una imagen de prueba (200x200)
@@ -59,7 +59,7 @@ class TestMainManager(unittest.TestCase):
     def test_main_manager_invalid_detector_method(self, mock_read_image, mock_parse_config):
         # Configuración con un método de detección inválido
         invalid_config = {
-            "preprocessing_methods": ["ExamplePreprocessingMethod"],
+            "preprocessing_methods": ["CannyMethod"],
             "detector_methods": "InvalidDetectionMethod"
         }
 

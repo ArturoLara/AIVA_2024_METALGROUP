@@ -9,31 +9,15 @@ class DetectionResult:
         self.width = width
         self.height = height
 
+    def __iter__(self):
+        return iter((self.px, self.py, self.width, self.height))
+
 class DetectionMethod(ABC):
 
     @abstractmethod
     def detect(self, image):
         """Método que debe implementar el algoritmo de detección"""
         pass
-
-class ExampleDetectionMethod(DetectionMethod):
-    def detect(self, image):
-        """
-        Función mockup para detectar defectos en una imagen procesada.
-
-        Si la imagen es la dummy (todos sus píxeles en cero),
-        se asume que no hay defectos y se retorna [(0,0,0,0)].
-
-        En otro caso se simula la detección de un defecto con coordenadas dummy.
-        """
-        print("Detectando imperfecciones en la imagen")
-
-        # Si la imagen es completamente negra, se interpreta como sin defectos.
-        if np.sum(image) == 0:
-            return [(0, 0, 0, 0)]
-        else:
-            # Se simula la detección de un defecto con coordenadas fijas.
-            return [(10, 10, 50, 50)]
 
 class ContrastMethod(DetectionMethod):
     def detect(self, image):

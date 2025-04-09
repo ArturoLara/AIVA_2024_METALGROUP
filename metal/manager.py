@@ -1,5 +1,5 @@
-from metal.preprocessing import PreprocessingManager, ExamplePreprocessingMethod, UmbralizeMethod, CannyMethod
-from metal.detection import DetectorManager, ExampleDetectionMethod, ContrastMethod
+from metal.preprocessing import PreprocessingManager, UmbralizeMethod, CannyMethod
+from metal.detection import DetectorManager, ContrastMethod
 from metal.tools import Tools
 
 class MainManager:
@@ -14,9 +14,7 @@ class MainManager:
         # Configurar preprocesadores
         preprocessing_manager = PreprocessingManager()
         for method_name in self.config.get("preprocessing_methods", []):
-            if method_name == "ExamplePreprocessingMethod":
-                preprocessing_manager.add_method(ExamplePreprocessingMethod())
-            elif method_name == "UmbralizeMethod":
+            if method_name == "UmbralizeMethod":
                 preprocessing_manager.add_method(UmbralizeMethod())
             elif method_name == "CannyMethod":
                 preprocessing_manager.add_method(CannyMethod())
@@ -24,9 +22,7 @@ class MainManager:
         # Configurar detector
         detector_manager = None
         method_name = self.config.get("detector_methods", [])
-        if method_name == "ExampleDetectionMethod":
-            detector_manager = DetectorManager(ExampleDetectionMethod())
-        elif method_name == "ContrastMethod":
+        if method_name == "ContrastMethod":
             detector_manager = DetectorManager(ContrastMethod())
         else:
             raise ValueError(f"Método de detección desconocido: {method_name}")
