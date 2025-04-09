@@ -55,24 +55,41 @@ pip install -r requirements.txt
 
 ## Uso
 
-El proyecto se organiza de manera modular para facilitar su integración. A modo de ejemplo:
+El proyecto está diseñado de manera modular para facilitar su integración y adaptarse a diferentes necesidades. Actualmente, la ejecución principal se realiza mediante un script `main` que permite analizar imágenes y detectar imperfecciones utilizando parámetros configurables. A continuación, se detalla el uso:
 
-- **Procesado de imágenes:**
-Ejecuta el módulo de preprocesamiento proporcionando la ruta de la imagen (200x200 píxeles). El sistema devolverá una imagen optimizada para el análisis.
-- **Detección de defectos:**
-Invoca la función principal de detección pasando la imagen preprocesada. La salida será una lista de tuplas con la información de cada defecto detectado o (0,0,0,0) en caso de no haber defectos.
+### Ejecución del Script Principal
 
-Ejemplo básico en Python:
+El programa se ejecuta desde la línea de comandos utilizando el siguiente formato:
 
-```python
-from detection_module import detectar_defectos
-
-ruta_imagen = "ruta/a/tu/imagen.png"
-resultado = detectar_defectos(ruta_imagen)
-print("Defectos detectados:", resultado)
+```bash
+python main.py --config  --image 
 ```
 
-> La función está diseñada para integrarse fácilmente tanto en proyectos Python como en aplicaciones Java mediante interfaces externas.
+### Parámetros
+
+- **`--config`**: Ruta al archivo de configuración en formato JSON.
+- **`--image`**: Ruta a la imagen que se desea analizar. La imagen debe tener un tamaño adecuado para garantizar resultados óptimos.
+
+### Ejemplo Básico
+
+Suponiendo un archivo de configuración `config.json` y una imagen `imagen.png`. Se puede ejecutar de la siguiente manera:
+
+```bash
+python main.py --config config.json --image imagen.png
+```
+### Ejemplo de Archivo de Configuración
+
+A continuación, se muestra un ejemplo de archivo de configuración en formato JSON:
+
+```bash
+{
+"preprocessing_methods": [
+"UmbralizeMethod",
+"CannyMethod"
+],
+"detector_methods": "ContrastMethod"
+}
+```
 
 ## Pruebas y Validación
 
