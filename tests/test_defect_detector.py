@@ -31,7 +31,7 @@ class TestDefectDetector(unittest.TestCase):
         """
         # Para este test, se utiliza una imagen dummy no nula.
         dummy_image = np.ones((200, 200), dtype=np.uint8) * 255
-        defects = DetectorManager(ExampleDetectionMethod()).execute(dummy_image)
+        defects = DetectorManager(ContrastMethod()).execute(dummy_image)
         self.assertGreaterEqual(len(defects), 1)
         self.assertLessEqual(len(defects), 5)
 
