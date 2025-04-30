@@ -37,7 +37,7 @@ def main():
     manager = MainManager(config_path=args.config, image_path=args.image)
     detections = manager.start()
 
-    dibujar_rectangulos_y_guardar(args.image, detections, "output.jpg")
+    dibujar_rectangulos_y_guardar(args.image, detections, "output_scratches3.jpg")
 
 
 if __name__ == "__main__":

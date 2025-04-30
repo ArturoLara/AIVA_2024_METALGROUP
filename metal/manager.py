@@ -1,34 +1,76 @@
-from metal.preprocessing import PreprocessingManager, UmbralizeMethod, CannyMethod
-from metal.detection import DetectorManager, ContrastMethod
+from metal.preprocessing import *
+from metal.detection import *
 from metal.tools import Tools
 
 class MainManager:
     def __init__(self, config_path, image_path):
         self.config = Tools.parse_config(config_path)
         self.image_path = image_path
+        self.scratches_manager = None
+        self.patches_manager = None
 
     def start(self):
         # Leer imagen
         image = Tools.read_image(self.image_path)
 
         # Configurar preprocesadores
-        preprocessing_manager = PreprocessingManager()
-        for method_name in self.config.get("preprocessing_methods", []):
-            if method_name == "UmbralizeMethod":
-                preprocessing_manager.add_method(UmbralizeMethod())
-            elif method_name == "CannyMethod":
-                preprocessing_manager.add_method(CannyMethod())
+        defect_type = self.config.get("defect_type", "auto")
+
+        # Siempre se crean ambos managers
+
+
+
+        if defect_type in ("scratches", "auto"):
+            self.scratches_manager = PreprocessingManager()
+            self.scratches_manager.add_method(CLAHEMethod(clip_limit=2.0, grid_size=(8, 8)))
+            self.scratches_manager.add_method(DirectionalFilterMethod(orientations=[0, 45, 90, 135]))
+            self.scratches_manager.add_method(AdaptiveStatsThresholdMethod(std_factor=1.5))
+            self.scratches_manager.add_method(MorphologyMethod(operation='dilate', kernel_type=cv2.MORPH_RECT, kernel_size=(3, 9)))
+            self.scratches_manager.add_method(MorphologyMethod(operation='close', kernel_type=cv2.MORPH_RECT, kernel_size=(1, 15)))
+            self.scratches_manager.add_method(MorphologyMethod(operation='open', kernel_type=cv2.MORPH_RECT, kernel_size=(1, 3)))
+
+        if defect_type in ("patches", "auto"):
+            self.patches_manager = PreprocessingManager()
+            self.patches_manager.add_method(GaussianBlurMethod(sigma=1.5))
+            self.patches_manager.add_method(LocalContrastMethod(kernel_size=25, contrast_factor=25))
+            self.patches_manager.add_method(AdaptiveThresholdMethod(block_size=35, C=7))
+            self.patches_manager.add_method(MorphologyMethod(operation='close', kernel_size=7))
+            self.patches_manager.add_method(MorphologyMethod(operation='open', kernel_size=3))
 
         # Configurar detector
-        detector_manager = None
-        method_name = self.config.get("detector_methods", [])
-        if method_name == "ContrastMethod":
-            detector_manager = DetectorManager(ContrastMethod())
-        else:
-            raise ValueError(f"Método de detección desconocido: {method_name}")
+        detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
+            area_min=200,  # Área mínima mayor para evitar detecciones de ruido
+            area_max=20000,  # Área máxima ajustada para defectos grandes
+            max_results=5,  # Limitar a 5 detecciones como máximo
+            border_threshold=15,  # Ignorar detecciones que estén a menos de 15 píxeles del borde
+            aspect_ratio_limit=5  # Limitar la relación de aspecto para evitar detecciones muy alargadas
+        ))
+
+        if defect_type == "scratches":
+            detector_manager = DetectorManager(ScratchDetectionMethod(min_length=30, max_width=20, max_results=5))
+        elif defect_type == "patches":
+            detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
+                area_min=200,  # Área mínima mayor para evitar detecciones de ruido
+                area_max=20000,  # Área máxima ajustada para defectos grandes
+                max_results=5,  # Limitar a 5 detecciones como máximo
+                border_threshold=15,  # Ignorar detecciones que estén a menos de 15 píxeles del borde
+                aspect_ratio_limit=5  # Limitar la relación de aspecto para evitar detecciones muy alargadas
+            ))
+        else:  # auto
+            detector_manager = DetectorManager(MultiDefectDetectionMethod(
+                scratch_detector=ScratchDetectionMethod(min_length=30, max_width=20, max_results=5),
+                patch_detector=EnhancedConnectedComponentsDetectionMethod(
+                    area_min=200, area_max=20000, max_results=5, border_threshold=15, aspect_ratio_limit=5),
+                combine_results=True
+            ))
 
         # Ejecutar preprocesadores
-        processed_image = preprocessing_manager.execute_all(image)
+        if self.scratches_manager:
+            image = self.scratches_manager.execute_all(image)
+        if self.patches_manager:
+            image = self.patches_manager.execute_all(image)
+
+        processed_image = image
 
         # Ejecutar detección
         results = detector_manager.execute(processed_image)
