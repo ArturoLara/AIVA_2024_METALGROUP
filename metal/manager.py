@@ -22,12 +22,9 @@ class MainManager:
 
         if defect_type in ("scratches", "auto"):
             self.scratches_manager = PreprocessingManager()
-            self.scratches_manager.add_method(CLAHEMethod(clip_limit=2.0, grid_size=(8, 8)))
-            self.scratches_manager.add_method(DirectionalFilterMethod(orientations=[0, 45, 90, 135]))
-            self.scratches_manager.add_method(AdaptiveStatsThresholdMethod(std_factor=1.5))
-            self.scratches_manager.add_method(MorphologyMethod(operation='dilate', kernel_type=cv2.MORPH_RECT, kernel_size=(3, 9)))
-            self.scratches_manager.add_method(MorphologyMethod(operation='close', kernel_type=cv2.MORPH_RECT, kernel_size=(1, 15)))
-            self.scratches_manager.add_method(MorphologyMethod(operation='open', kernel_type=cv2.MORPH_RECT, kernel_size=(1, 3)))
+            self.scratches_manager.add_method(CLAHEMethod(clip_limit=2.5, grid_size=(8, 8)))
+            self.scratches_manager.add_method(BrightScratchMethod(contrast_enhance=1.5, threshold_factor=0.7))
+            self.scratches_manager.add_method(MorphologyMethod(operation='close', kernel_size=(3, 9)))
 
         if defect_type in ("patches", "auto"):
             self.patches_manager = PreprocessingManager()

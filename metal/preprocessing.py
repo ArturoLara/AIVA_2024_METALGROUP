@@ -259,6 +259,55 @@ class DirectionalFilterMethod(PreprocessingMethod):
 
         return final
 
+class BrightScratchMethod(PreprocessingMethod):
+    def __init__(self, contrast_enhance=1.5, threshold_factor=0.7):
+        self.contrast_enhance = contrast_enhance
+        self.threshold_factor = threshold_factor
+
+    def process(self, image):
+        print(f"Procesando imagen con BrightScratchMethod")
+
+        # Asegurar escala de grises
+        if len(image.shape) > 2:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # 1. Mejorar contraste para resaltar elementos brillantes
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(image)
+
+        # 2. Aplicar umbralización para destacar solo elementos brillantes
+        # Calcular umbral adaptativo basado en histograma
+        hist = cv2.calcHist([enhanced], [0], None, [256], [0, 256])
+        total_pixels = enhanced.shape[0] * enhanced.shape[1]
+
+        # Encontrar umbral que separe el top 10-15% más brillante
+        cumsum = 0
+        for i in range(255, -1, -1):
+            cumsum += hist[i][0]
+            if cumsum / total_pixels > 0.15:  # Ajustar este valor según necesidades
+                threshold = i
+                break
+
+        binary = cv2.threshold(enhanced, threshold, 255, cv2.THRESH_BINARY)[1]
+
+        # 3. Aplicar operaciones morfológicas específicas para rayones
+        # Kernel direccional vertical alargado (para rayones verticales)
+        kernel_v = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 7))
+        # Kernel direccional horizontal (para rayones horizontales)
+        kernel_h = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 1))
+
+        # Aplicar aperturas direccionales para eliminar ruido pequeño
+        opened_v = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel_v)
+        opened_h = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel_h)
+
+        # Combinar resultados
+        combined = cv2.bitwise_or(opened_v, opened_h)
+
+        # 4. Conectar fragmentos del mismo rayón
+        kernel_close = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 9))
+        closed = cv2.morphologyEx(combined, cv2.MORPH_CLOSE, kernel_close)
+
+        return closed
 
 class AdaptiveStatsThresholdMethod(PreprocessingMethod):
     def __init__(self, std_factor=1.5, offset=0):
