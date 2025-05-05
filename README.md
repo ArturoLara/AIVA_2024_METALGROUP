@@ -106,7 +106,7 @@ A continuación, se muestra un ejemplo de archivo de configuración en formato J
 "detector_methods": "ContrastMethod"
 }
 ```
-=======
+
 **Uso con Python**
 
 El sistema se utiliza mediante la ejecución directa del script principal, pasando la ruta al archivo de configuración y la imagen a analizar. Ejemplo básico:
