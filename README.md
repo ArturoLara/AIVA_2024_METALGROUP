@@ -71,7 +71,6 @@ docker pull artzulm/aiva_2024_metalgroup:latest
 
 ## Uso
 
-<<<<<<< Updated upstream
 El proyecto está diseñado de manera modular para facilitar su integración y adaptarse a diferentes necesidades. Actualmente, la ejecución principal se realiza mediante un script `main` que permite analizar imágenes y detectar imperfecciones utilizando parámetros configurables. A continuación, se detalla el uso:
 
 ### Ejecución del Script Principal
@@ -154,7 +153,6 @@ docker run -e CONFIG=/App/config.json -e IMAGE=/App/tu_imagen.jpg -v $(pwd):/App
 ---
 
 Ambos métodos (Python y Docker) permiten analizar imágenes para detectar defectos, generando como salida una lista de objetos detectados y, opcionalmente, una imagen con los defectos resaltados. Docker facilita la integración y despliegue sin preocuparse por dependencias o configuraciones adicionales.
->>>>>>> Stashed changes
 
 ## Pruebas y Validación
 
