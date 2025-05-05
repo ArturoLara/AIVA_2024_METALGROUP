@@ -30,7 +30,7 @@ La solución permite la invocación de sus funcionalidades desde Java y Python, 
 
 ## Instalación y Configuración
 
-**Método Python**
+**Método para instalación en nativo con Python**
 
 - Clona el repositorio y accede a la carpeta:
 
