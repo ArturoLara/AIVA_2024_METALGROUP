@@ -1,7 +1,3 @@
 {
-    "preprocessing_methods": [
-        "UmbralizeMethod",
-        "CannyMethod"
-    ],
-    "detector_methods": "ContrastMethod"
+    "defect_type": "auto"
 }
