@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from abc import ABC, abstractmethod
-from scipy import ndimage
 
 class PreprocessingMethod(ABC):
     @abstractmethod
