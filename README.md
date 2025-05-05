@@ -30,28 +30,44 @@ La solución permite la invocación de sus funcionalidades desde Java y Python, 
 
 ## Instalación y Configuración
 
-1. **Clonar el repositorio:**
+**Método para instalación en nativo con Python**
+
+- Clona el repositorio y accede a la carpeta:
 
 ```bash
-git clone https://github.com/tu_usuario/defect-detection.git
-cd defect-detection
+git clone https://github.com/ArturoLara/AIVA_2024_METALGROUP.git
+cd AIVA_2024_METALGROUP
 ```
 
-2. **Crear y activar un entorno virtual (opcional):**
+- (Opcional) Crea y activa un entorno virtual:
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
 
-3. **Instalar las dependencias:**
+- Instala las dependencias necesarias:
 
 ```bash
 pip install -r requirements.txt
 ```
 
+> Consulta el archivo `requirements.txt` para la lista completa y actualizada de dependencias.
 
-> Se recomienda revisar el archivo `requirements.txt` para obtener la lista actualizada de dependencias.
+---
+
+**Método Docker**
+
+- Asegúrate de tener Docker instalado en tu sistema.
+- Descarga y ejecuta la imagen oficial desde Docker Hub, montando el directorio actual para acceder a tus imágenes y archivos de configuración:
+
+```bash
+docker pull artzulm/aiva_2024_metalgroup:latest
+```
+
+> El contenedor Docker incluye todas las dependencias y el código necesario, facilitando la ejecución sin necesidad de configurar el entorno Python manualmente.
+
+---
 
 ## Uso
 
@@ -90,6 +106,53 @@ A continuación, se muestra un ejemplo de archivo de configuración en formato J
 "detector_methods": "ContrastMethod"
 }
 ```
+
+**Uso con Python**
+
+El sistema se utiliza mediante la ejecución directa del script principal, pasando la ruta al archivo de configuración y la imagen a analizar. Ejemplo básico:
+
+```python
+from metal.manager import MainManager
+
+config_path = "ruta/a/config.json"
+image_path = "ruta/a/tu_imagen.jpg"
+
+manager = MainManager(config_path=config_path, image_path=image_path)
+detections = manager.start()
+print("Defectos detectados:", detections)
+```
+
+Para ejecutar desde línea de comandos:
+
+```bash
+python main.py --config ruta/a/config.json --image ruta/a/tu_imagen.jpg
+```
+
+- El resultado será una lista de objetos detectados. Puedes usar la función `dibujar_rectangulos_y_guardar` para visualizar los defectos sobre la imagen original y guardar el resultado:
+
+```python
+from main import dibujar_rectangulos_y_guardar
+
+dibujar_rectangulos_y_guardar(image_path, detections, "output_patches.jpg")
+```
+
+---
+
+**Uso con Docker**
+
+- Una vez tengas tus archivos en el directorio actual (imagen y configuración), ejecuta:
+
+```bash
+docker run -e CONFIG=/App/config.json -e IMAGE=/App/tu_imagen.jpg -v $(pwd):/App artzulm/aiva_2024_metalgroup:latest
+```
+- Sustituye `tu_imagen.jpg` y `config.json` por los nombres de tus archivos dentro del directorio actual.
+- El contenedor procesará la imagen indicada y generará la salida en el mismo mormato que el método Python para su versión asociada, pero en un entorno aislado y controlado.
+
+> Este método encapsula todo el flujo de análisis y detección en un entorno controlado, ideal para despliegues rápidos y reproducibles.
+
+---
+
+Ambos métodos (Python y Docker) permiten analizar imágenes para detectar defectos, generando como salida una lista de objetos detectados y, opcionalmente, una imagen con los defectos resaltados. Docker facilita la integración y despliegue sin preocuparse por dependencias o configuraciones adicionales.
 
 ## Pruebas y Validación
 
