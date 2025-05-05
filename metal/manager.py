@@ -8,6 +8,7 @@ class MainManager:
         self.image_path = image_path
         self.scratches_manager = None
         self.patches_manager = None
+        self.detector_manager = None
 
     def start(self):
         # Leer imagen
@@ -35,7 +36,7 @@ class MainManager:
             self.patches_manager.add_method(MorphologyMethod(operation='open', kernel_size=3))
 
         # Configurar detector
-        detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
+        self.detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
             area_min=200,  # Área mínima mayor para evitar detecciones de ruido
             area_max=20000,  # Área máxima ajustada para defectos grandes
             max_results=5,  # Limitar a 5 detecciones como máximo
@@ -44,9 +45,9 @@ class MainManager:
         ))
 
         if defect_type == "scratches":
-            detector_manager = DetectorManager(ScratchDetectionMethod(min_length=30, max_width=20, max_results=5))
+            self.detector_manager = DetectorManager(ScratchDetectionMethod(min_length=30, max_width=20, max_results=5))
         elif defect_type == "patches":
-            detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
+            self.detector_manager = DetectorManager(EnhancedConnectedComponentsDetectionMethod(
                 area_min=200,  # Área mínima mayor para evitar detecciones de ruido
                 area_max=20000,  # Área máxima ajustada para defectos grandes
                 max_results=5,  # Limitar a 5 detecciones como máximo
@@ -54,7 +55,7 @@ class MainManager:
                 aspect_ratio_limit=5  # Limitar la relación de aspecto para evitar detecciones muy alargadas
             ))
         else:  # auto
-            detector_manager = DetectorManager(MultiDefectDetectionMethod(
+            self.detector_manager = DetectorManager(MultiDefectDetectionMethod(
                 scratch_detector=ScratchDetectionMethod(min_length=30, max_width=20, max_results=5),
                 patch_detector=EnhancedConnectedComponentsDetectionMethod(
                     area_min=200, area_max=20000, max_results=5, border_threshold=15, aspect_ratio_limit=5),
@@ -70,7 +71,7 @@ class MainManager:
         processed_image = image
 
         # Ejecutar detección
-        results = detector_manager.execute(processed_image)
+        results = self.detector_manager.execute(processed_image)
 
         # Mostrar resultados (puedes personalizar esto)
         for result in results:

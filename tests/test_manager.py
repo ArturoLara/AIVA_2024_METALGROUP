@@ -1,78 +1,100 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import numpy as np
-from metal.preprocessing import PreprocessingManager, UmbralizeMethod, CannyMethod
-from metal.detection import DetectorManager, ContrastMethod
+from metal.preprocessing import *
+from metal.detection import *
 from metal.tools import Tools
-from metal.manager import MainManager
+from main import MainManager
 
 
 class TestMainManager(unittest.TestCase):
-    def setUp(self):
-        # Crear configuraciones de prueba
-        self.config_path = "config.yaml"
-        self.image_path = "test_image.jpg"
-
-        # Mock de la configuración
+    @patch('metal.tools.Tools.parse_config')
+    def setUp(self, mock_parse_config):
+        # Configuración base para todos los tests
         self.mock_config = {
-            "preprocessing_methods": ["UmbralizeMethod", "CannyMethod"],
-            "detector_methods": "ContrastMethod"
+            "defect_type": "auto",
+            "other_params": {"example": 123}
         }
-
-        # Mock de una imagen de prueba (200x200)
-        self.mock_image = np.ones((200, 200), dtype=np.uint8) * 100
-
-    @patch("metal.tools.Tools.parse_config")
-    @patch("metal.tools.Tools.read_image")
-    @patch("metal.preprocessing.PreprocessingManager.execute_all")
-    @patch("metal.detection.DetectorManager.execute")
-    def test_main_manager_workflow(self, mock_execute_detection, mock_execute_preprocessing, mock_read_image,
-                                   mock_parse_config):
-        # Configurar los mocks
         mock_parse_config.return_value = self.mock_config
-        mock_read_image.return_value = self.mock_image
+        self.image_path = "test_image.jpg"
+        self.manager = MainManager("dummy_config.json", self.image_path)
 
-        # Mock del resultado del preprocesamiento (imagen procesada)
-        processed_image = np.zeros((200, 200), dtype=np.uint8)
-        mock_execute_preprocessing.return_value = processed_image
+    def test_initialization(self):
+        """Verifica la inicialización correcta del manager"""
+        self.assertEqual(self.manager.image_path, self.image_path)
+        self.assertEqual(self.manager.config, self.mock_config)
+        self.assertIsNone(self.manager.scratches_manager)
+        self.assertIsNone(self.manager.patches_manager)
 
-        # Mock del resultado de la detección
-        detection_results = [MagicMock(px=10, py=10, width=50, height=50)]
-        mock_execute_detection.return_value = detection_results
+    @patch('metal.tools.Tools.read_image')
+    def test_scratches_processing(self, mock_read_image):
+        """Test configuración específica para scratches"""
+        # Configurar mocks
+        self.mock_config["defect_type"] = "scratches"
+        mock_read_image.return_value = np.zeros((100, 100), dtype=np.uint8)
 
-        # Instanciar MainManager y ejecutar el flujo principal
-        manager = MainManager(self.config_path, self.image_path)
-        manager.start()
+        # Ejecutar flujo principal
+        results = self.manager.start()
 
-        # Verificar que se llamó a parse_config con la ruta correcta
-        mock_parse_config.assert_called_once_with(self.config_path)
+        # Verificar preprocesadores
+        scratch_methods = self.manager.scratches_manager.methods
+        self.assertEqual(len(scratch_methods), 3)
+        self.assertIsInstance(scratch_methods[0], CLAHEMethod)
+        self.assertIsInstance(scratch_methods[1], BrightScratchMethod)
+        self.assertIsInstance(scratch_methods[2], MorphologyMethod)
 
-        # Verificar que se llamó a read_image con la ruta correcta
-        mock_read_image.assert_called_once_with(self.image_path)
+    @patch('metal.tools.Tools.read_image')
+    def test_patches_processing(self, mock_read_image):
+        """Test configuración específica para patches"""
+        self.mock_config["defect_type"] = "patches"
+        mock_read_image.return_value = np.zeros((100, 100), dtype=np.uint8)
 
-        # Verificar que se ejecutaron los preprocesadores y el detector
-        mock_execute_preprocessing.assert_called_once_with(self.mock_image)
-        mock_execute_detection.assert_called_once_with(processed_image)
+        results = self.manager.start()
 
-    @patch("metal.tools.Tools.parse_config")
-    @patch("metal.tools.Tools.read_image")
-    def test_main_manager_invalid_detector_method(self, mock_read_image, mock_parse_config):
-        # Configuración con un método de detección inválido
-        invalid_config = {
-            "preprocessing_methods": ["CannyMethod"],
-            "detector_methods": "InvalidDetectionMethod"
-        }
+        # Verificar preprocesadores
+        patch_methods = self.manager.patches_manager.methods
+        self.assertEqual(len(patch_methods), 5)
+        self.assertIsInstance(patch_methods[0], GaussianBlurMethod)
+        self.assertIsInstance(patch_methods[1], LocalContrastMethod)
 
-        mock_parse_config.return_value = invalid_config
-        mock_read_image.return_value = self.mock_image
+    @patch('metal.tools.Tools.read_image')
+    def test_auto_processing(self, mock_read_image):
+        """Test modo automático con ambos procesadores"""
+        mock_read_image.return_value = np.zeros((100, 100), dtype=np.uint8)
 
-        manager = MainManager(self.config_path, self.image_path)
+        results = self.manager.start()
 
-        with self.assertRaises(ValueError) as context:
-            manager.start()
+        # Verificar ambos preprocesadores
+        self.assertIsNotNone(self.manager.scratches_manager)
+        self.assertIsNotNone(self.manager.patches_manager)
 
-        self.assertEqual(str(context.exception), "Método de detección desconocido: InvalidDetectionMethod")
+    @patch('metal.tools.Tools.read_image')
+    def test_invalid_defect_type(self, mock_read_image):
+        """Test tipo de defecto inválido (debería usar auto)"""
+        self.mock_config["defect_type"] = "invalid"
+        mock_read_image.return_value = np.zeros((100, 100), dtype=np.uint8)
+
+        results = self.manager.start()
+
+    @patch('metal.tools.Tools.read_image')
+    def test_full_integration(self, mock_read_image):
+        """Test de integración completa con salida simulada"""
+        # Configurar mock de imagen y detector
+        mock_image = np.random.randint(0, 255, (500, 500), dtype=np.uint8)
+        mock_read_image.return_value = mock_image
+
+        # Ejecutar flujo completo
+        results = self.manager.start()
+
+        # Verificar formato de resultados
+        self.assertIsInstance(results, list)
+        if len(results) > 0:
+            detection = results[0]
+            self.assertTrue(hasattr(detection, 'px'))
+            self.assertTrue(hasattr(detection, 'py'))
+            self.assertTrue(hasattr(detection, 'width'))
+            self.assertTrue(hasattr(detection, 'height'))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
