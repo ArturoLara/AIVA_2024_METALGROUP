@@ -17,7 +17,7 @@ class GaussianBlurMethod(PreprocessingMethod):
 
 class MedianBlurMethod(PreprocessingMethod):
     def __init__(self, ksize=3):
-        self.ksize = ksize if self.ksize % 2 == 1 else self.ksize + 1  # ksize debe ser impar
+        self.ksize = ksize if ksize % 2 == 1 else ksize + 1
 
     def process(self, image):
         return cv2.medianBlur(image, self.ksize)
