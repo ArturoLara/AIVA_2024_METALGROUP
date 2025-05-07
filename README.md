@@ -93,19 +93,117 @@ Suponiendo un archivo de configuración `config.json` y una imagen `imagen.png`.
 ```bash
 python main.py --config config.json --image imagen.png
 ```
-### Ejemplo de Archivo de Configuración
 
-A continuación, se muestra un ejemplo de archivo de configuración en formato JSON:
+## Sistema de Configuración de Detección de Defectos
 
-```bash
+### Estructura del JSON
+El archivo de configuración permite definir pipelines personalizados para cada tipo de defecto. Se puede consultar el archivo de configuración de [ejemplo](https://github.com/ArturoLara/AIVA_2024_METALGROUP/blob/main/config.json) en el repositorio. La estructura básica es:
+
+```json
 {
-"preprocessing_methods": [
-"UmbralizeMethod",
-"CannyMethod"
-],
-"detector_methods": "ContrastMethod"
+    "defect_type": "auto",
+    "scratches_preprocessing": [],
+    "patches_preprocessing": [],
+    "scratches_detector": {},
+    "patches_detector": {}
 }
 ```
+
+#### Secciones Clave:
+1. **`defect_type`**:  
+   - `"scratches"`: Solo detecta arañazos  
+   - `"patches"`: Solo detecta manchas  
+   - `"auto"`: Detecta ambos tipos (valor por defecto)
+
+2. **Preprocesado (`*_preprocessing`)**  
+   Lista de métodos a aplicar en orden, cada uno con sus parámetros:
+   ```json
+   {
+       "name": "NombreClaseMetodo",
+       "params": {"param1": valor1, "param2": valor2}
+   }
+   ```
+
+3. **Detección (`*_detector`)**  
+   Configuración específica para cada tipo de detector:
+   ```json
+   {
+       "name": "NombreClaseDetector",
+       "params": {"param1": valor1}
+   }
+   ```
+
+---
+
+### Métodos Disponibles
+
+| **Tipo**      | **Clase / Método**                        | **Parámetros**                                                                                      | **Descripción**                                               |
+|---------------|-------------------------------------------|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| Preprocesado  | `GaussianBlurMethod`                      | `sigma` (float, por defecto 1.0)                                                                   | Suavizado Gaussiano                                           |
+| Preprocesado  | `MedianBlurMethod`                        | `ksize` (int, impar, por defecto 3)                                                                | Suavizado Mediano                                             |
+| Preprocesado  | `SobelGradientMethod`                     | *(sin parámetros)*                                                                                  | Gradiente Sobel (bordes)                                      |
+| Preprocesado  | `ThresholdMethod`                         | `factor` (float, por defecto 0.2)                                                                  | Umbralización global                                          |
+| Preprocesado  | `AdaptiveThresholdMethod`                 | `block_size` (int, impar, por defecto 35), `C` (int, por defecto 5)                                | Umbralización adaptativa                                      |
+| Preprocesado  | `MorphologyMethod`                        | `operation` (str), `kernel_size` (int o tupla), `kernel_type` (por defecto MORPH_RECT)             | Operaciones morfológicas (open, close, erode, dilate)         |
+| Preprocesado  | `LocalContrastMethod`                     | `kernel_size` (int, por defecto 25), `contrast_factor` (int, por defecto 20), `offset` (int, 128)  | Realce de contraste local                                     |
+| Preprocesado  | `EnhancedPatchMethod`                     | *(sin parámetros)*                                                                                  | Pipeline especializado para manchas                           |
+| Preprocesado  | `CLAHEMethod`                             | `clip_limit` (float, por defecto 2.0), `grid_size` (tupla, por defecto (8,8))                      | Equalización adaptativa de histograma                         |
+| Preprocesado  | `DirectionalFilterMethod`                 | `orientations` (lista de int, por defecto[135]), `kernel_size` (int, por defecto 15)      | Filtrado direccional                                          |
+| Preprocesado  | `BrightScratchMethod`                     | `contrast_enhance` (float, 1.5), `threshold_factor` (float, 0.7)                                   | Realce y umbral para rayones brillantes                       |
+| Preprocesado  | `AdaptiveStatsThresholdMethod`            | `std_factor` (float, 1.5), `offset` (int, 0)                                                       | Umbralización estadística local                               |
+| Preprocesado  | `InvertMethod`                            | *(sin parámetros)*                                                                                  | Inversión de intensidades                                     |
+| Preprocesado  | `NormalizeMethod`                         | *(sin parámetros)*                                                                                  | Normalización de rango dinámico                               |
+| Preprocesado  | `UmbralizeMethod`                         | *(sin parámetros)*                                                                                  | Umbralización fija a 200                                      |
+| Preprocesado  | `CannyMethod`                             | *(sin parámetros)*                                                                                  | Detección de bordes Canny                                     |
+| Detección     | `ContrastMethod`                          | *(sin parámetros)*                                                                                  | Detección por contornos                                       |
+| Detección     | `ConnectedComponentsDetectionMethod`      | `area_min` (int, 50), `area_max` (int, 5000), `max_results` (int, 5)                               | Componentes conectados básico                                 |
+| Detección     | `EnhancedConnectedComponentsDetectionMethod` | `area_min` (200), `area_max` (20000), `max_results` (5), `border_threshold` (10), `aspect_ratio_limit` (8) | Componentes conectados avanzado                               |
+| Detección     | `ScratchDetectionMethod`                  | `min_length` (30), `max_width` (20), `max_results` (5)                                             | Detección de rayones                                          |
+| Detección     | `MultiDefectDetectionMethod`              | `scratch_detector`, `patch_detector`, `combine_results` (bool, True)                               | Combinación de detectores especializados                      |
+
+---
+
+### Ejemplos Prácticos
+
+#### 1. Configuración para arañazos con realce de contraste
+```json
+{
+    "defect_type": "scratches",
+    "scratches_preprocessing": [
+        {
+            "name": "CLAHEMethod",
+            "params": {"clip_limit": 3.0}
+        },
+        {
+            "name": "MorphologyMethod",
+            "params": {"operation": "close", "kernel_size": [3,9]}
+        }
+    ]
+}
+```
+
+#### 2. Detección automática con parámetros personalizados
+```json
+{
+    "defect_type": "auto",
+    "patches_preprocessing": [
+        {
+            "name": "MedianBlurMethod",
+            "params": {"ksize": 5}
+        },
+        {
+            "name": "AdaptiveThresholdMethod",
+            "params": {"block_size": 25}
+        }
+    ],
+    "scratches_detector": {
+        "name": "ScratchDetectionMethod",
+        "params": {"min_length": 40}
+    }
+}
+```
+
+---
 
 **Uso con Python**
 
