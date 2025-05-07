@@ -1,3 +1,84 @@
 {
-    "defect_type": "auto"
+    "defect_type": "auto",
+
+    "scratches_preprocessing": [
+        {
+            "name": "CLAHEMethod",
+            "params": {
+                "clip_limit": 2.5,
+                "grid_size": [8, 8]
+            }
+        },
+        {
+            "name": "BrightScratchMethod",
+            "params": {
+                "contrast_enhance": 1.5,
+                "threshold_factor": 0.7
+            }
+        },
+        {
+            "name": "MorphologyMethod",
+            "params": {
+                "operation": "close",
+                "kernel_size": [3, 9]
+            }
+        }
+    ],
+
+    "patches_preprocessing": [
+        {
+            "name": "GaussianBlurMethod",
+            "params": {
+                "sigma": 1.5
+            }
+        },
+        {
+            "name": "LocalContrastMethod",
+            "params": {
+                "kernel_size": 25,
+                "contrast_factor": 25
+            }
+        },
+        {
+            "name": "AdaptiveThresholdMethod",
+            "params": {
+                "block_size": 35,
+                "C": 7
+            }
+        },
+        {
+            "name": "MorphologyMethod",
+            "params": {
+                "operation": "close",
+                "kernel_size": 7
+            }
+        },
+        {
+            "name": "MorphologyMethod",
+            "params": {
+                "operation": "open",
+                "kernel_size": 3
+            }
+        }
+    ],
+
+    "scratches_detector": {
+        "name": "ScratchDetectionMethod",
+        "params": {
+            "min_length": 30,
+            "max_width": 20,
+            "max_results": 5
+        }
+    },
+
+    "patches_detector": {
+        "name": "EnhancedConnectedComponentsDetectionMethod",
+        "params": {
+            "area_min": 200,
+            "area_max": 20000,
+            "max_results": 5,
+            "border_threshold": 15,
+            "aspect_ratio_limit": 5
+        }
+    }
 }

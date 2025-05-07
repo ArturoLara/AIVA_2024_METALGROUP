@@ -286,7 +286,7 @@ class MultiDefectDetectionMethod(DetectionMethod):
         self.combine_results = combine_results
 
     def detect(self, image):
-        print("Detectando con MultiDefectDetectionMethod")
+
 
         # Crear dos copias de la imagen para detección independiente
         scratch_image = image.copy()
