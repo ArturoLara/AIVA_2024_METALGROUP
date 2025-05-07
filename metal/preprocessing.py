@@ -13,7 +13,6 @@ class GaussianBlurMethod(PreprocessingMethod):
         self.sigma = sigma
 
     def process(self, image):
-        print("Procesando imagen con GaussianBlurMethod")
         return cv2.GaussianBlur(image, (0, 0), self.sigma)
 
 class MedianBlurMethod(PreprocessingMethod):
@@ -21,7 +20,6 @@ class MedianBlurMethod(PreprocessingMethod):
         self.ksize = ksize if self.ksize % 2 == 1 else self.ksize + 1  # ksize debe ser impar
 
     def process(self, image):
-        print("Procesando imagen con MedianBlurMethod")
         return cv2.medianBlur(image, self.ksize)
 
 class SobelGradientMethod(PreprocessingMethod):
@@ -29,7 +27,6 @@ class SobelGradientMethod(PreprocessingMethod):
         pass
 
     def process(self, image):
-        print("Procesando imagen con SobelGradientMethod")
         grad_x = cv2.Sobel(image, cv2.CV_64F, 1, 0, ksize=3)
         grad_y = cv2.Sobel(image, cv2.CV_64F, 0, 1, ksize=3)
         grad = cv2.magnitude(grad_x, grad_y)
@@ -41,7 +38,6 @@ class ThresholdMethod(PreprocessingMethod):
         self.factor = factor
 
     def process(self, image):
-        print(f"Procesando imagen con ThresholdMethod (factor={self.factor})")
         thresh = np.max(image) * self.factor
         return (image > thresh).astype(np.uint8) * 255
 
@@ -53,7 +49,6 @@ class AdaptiveThresholdMethod(PreprocessingMethod):
         self.adaptive_method = adaptive_method
 
     def process(self, image):
-        print(f"Procesando imagen con AdaptiveThresholdMethod (block_size={self.block_size}, C={self.C})")
 
         # Asegurar que la imagen sea de tipo uint8
         if image.dtype != np.uint8:
@@ -85,7 +80,6 @@ class MorphologyMethod(PreprocessingMethod):
             self.kernel = cv2.getStructuringElement(kernel_type, (kernel_size, kernel_size))
 
     def process(self, image):
-        print(f"Procesando imagen con MorphologyMethod (operation={self.operation})")
 
         # Asegurar que la imagen es binaria
         if image.dtype != np.uint8:
@@ -110,7 +104,6 @@ class LocalContrastMethod(PreprocessingMethod):
         self.offset = offset
 
     def process(self, image):
-        print(f"Procesando imagen con LocalContrastMethod (kernel_size={self.kernel_size})")
         # Convertir a float32 para cálculos
         image_float = image.astype(np.float32)
 
@@ -132,7 +125,6 @@ class LocalContrastMethod(PreprocessingMethod):
 
 class EnhancedPatchMethod(PreprocessingMethod):
     def process(self, image):
-        print("Procesando imagen con EnhancedPatchMethod (para manchas)")
 
         # Convertir a escala de grises si es necesario
         if len(image.shape) > 2:
@@ -175,7 +167,6 @@ class CLAHEMethod(PreprocessingMethod):
         self.grid_size = grid_size
 
     def process(self, image):
-        print(f"Procesando imagen con CLAHEMethod (clip_limit={self.clip_limit}, grid_size={self.grid_size})")
 
         # Asegurar que la imagen es de tipo uint8 y en escala de grises
         if image.dtype != np.uint8:
@@ -195,7 +186,6 @@ class DirectionalFilterMethod(PreprocessingMethod):
         self.kernel_size = kernel_size
 
     def process(self, image):
-        print(f"Procesando imagen con DirectionalFilterMethod (orientations={self.orientations})")
 
         # Asegurar formato correcto
         if image.dtype != np.uint8:
@@ -264,7 +254,6 @@ class BrightScratchMethod(PreprocessingMethod):
         self.threshold_factor = threshold_factor
 
     def process(self, image):
-        print(f"Procesando imagen con BrightScratchMethod")
 
         # Asegurar escala de grises
         if len(image.shape) > 2:
@@ -314,7 +303,6 @@ class AdaptiveStatsThresholdMethod(PreprocessingMethod):
         self.offset = offset
 
     def process(self, image):
-        print(f"Procesando imagen con AdaptiveStatsThresholdMethod (std_factor={self.std_factor})")
 
         # Asegurar formato correcto
         if len(image.shape) > 2:
@@ -338,7 +326,6 @@ class InvertMethod(PreprocessingMethod):
         pass
 
     def process(self, image):
-        print("Procesando imagen con InvertMethod")
         return 255 - image
 
 class NormalizeMethod(PreprocessingMethod):
@@ -346,7 +333,6 @@ class NormalizeMethod(PreprocessingMethod):
         pass
 
     def process(self, image):
-        print("Procesando imagen con NormalizeMethod")
         min_val = np.min(image)
         max_val = np.max(image)
         if max_val > min_val:
@@ -357,13 +343,11 @@ class NormalizeMethod(PreprocessingMethod):
 
 class UmbralizeMethod(PreprocessingMethod):
     def process(self, image):
-        print("Procesando imagen con UmbralizeMethod")
         _, processed_image = cv2.threshold(image, 200, 255, cv2.THRESH_BINARY)
         return processed_image
 
 class CannyMethod(PreprocessingMethod):
     def process(self, image):
-        print("Procesando imagen con CannyMethod")
         processed_image = cv2.Canny(image, threshold1=100, threshold2=100 * 2)
         return processed_image
 
