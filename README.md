@@ -93,19 +93,108 @@ Suponiendo un archivo de configuración `config.json` y una imagen `imagen.png`.
 ```bash
 python main.py --config config.json --image imagen.png
 ```
-### Ejemplo de Archivo de Configuración
 
-A continuación, se muestra un ejemplo de archivo de configuración en formato JSON:
+## Sistema de Configuración de Detección de Defectos
 
-```bash
+### Estructura del JSON
+El archivo de configuración permite definir pipelines personalizados para cada tipo de defecto. La estructura básica es:
+
+```json
 {
-"preprocessing_methods": [
-"UmbralizeMethod",
-"CannyMethod"
-],
-"detector_methods": "ContrastMethod"
+    "defect_type": "auto",
+    "scratches_preprocessing": [],
+    "patches_preprocessing": [],
+    "scratches_detector": {},
+    "patches_detector": {}
 }
 ```
+
+#### Secciones Clave:
+1. **`defect_type`**:  
+   - `"scratches"`: Solo detecta arañazos  
+   - `"patches"`: Solo detecta manchas  
+   - `"auto"`: Detecta ambos tipos (valor por defecto)
+
+2. **Preprocesado (`*_preprocessing`)**  
+   Lista de métodos a aplicar en orden, cada uno con sus parámetros:
+   ```json
+   {
+       "name": "NombreClaseMetodo",
+       "params": {"param1": valor1, "param2": valor2}
+   }
+   ```
+
+3. **Detección (`*_detector`)**  
+   Configuración específica para cada tipo de detector:
+   ```json
+   {
+       "name": "NombreClaseDetector",
+       "params": {"param1": valor1}
+   }
+   ```
+
+---
+
+### Métodos Disponibles
+
+#### Preprocesado (preprocessing.py)
+| Método | Parámetros | Descripción |
+|--------|------------|-------------|
+| **CLAHEMethod** | `clip_limit`, `grid_size` | Equalización de histograma adaptativo |
+| **BrightScratchMethod** | `contrast_enhance`, `threshold_factor` | Mejora de contraste para rayones brillantes |
+| **MorphologyMethod** | `operation`, `kernel_size` | Operaciones morfológicas (open/close/erode/dilate) |
+| **GaussianBlurMethod** | `sigma` | Suavizado gaussiano |
+| **AdaptiveThresholdMethod** | `block_size`, `C` | Umbralización adaptativa |
+
+#### Detección (detection.py)
+| Método | Parámetros | Aplicación |
+|--------|------------|------------|
+| **ScratchDetectionMethod** | `min_length`, `max_width` | Detección de rayones lineales |
+| **EnhancedConnectedComponents** | `area_min`, `area_max` | Detección de manchas por componentes conectados |
+
+---
+
+### Ejemplos Prácticos
+
+#### 1. Configuración para arañazos con realce de contraste
+```json
+{
+    "defect_type": "scratches",
+    "scratches_preprocessing": [
+        {
+            "name": "CLAHEMethod",
+            "params": {"clip_limit": 3.0}
+        },
+        {
+            "name": "MorphologyMethod",
+            "params": {"operation": "close", "kernel_size": [3,9]}
+        }
+    ]
+}
+```
+
+#### 2. Detección automática con parámetros personalizados
+```json
+{
+    "defect_type": "auto",
+    "patches_preprocessing": [
+        {
+            "name": "MedianBlurMethod",
+            "params": {"ksize": 5}
+        },
+        {
+            "name": "AdaptiveThresholdMethod",
+            "params": {"block_size": 25}
+        }
+    ],
+    "scratches_detector": {
+        "name": "ScratchDetectionMethod",
+        "params": {"min_length": 40}
+    }
+}
+```
+
+---
 
 **Uso con Python**
 
