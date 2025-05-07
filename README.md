@@ -97,7 +97,7 @@ python main.py --config config.json --image imagen.png
 ## Sistema de Configuración de Detección de Defectos
 
 ### Estructura del JSON
-El archivo de configuración permite definir pipelines personalizados para cada tipo de defecto. La estructura básica es:
+El archivo de configuración permite definir pipelines personalizados para cada tipo de defecto. Se puede consultar el archivo de configuración de [ejemplo](https://github.com/ArturoLara/AIVA_2024_METALGROUP/blob/main/config.json) en el repositorio. La estructura básica es:
 
 ```json
 {
