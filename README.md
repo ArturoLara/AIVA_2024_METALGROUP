@@ -241,7 +241,7 @@ dibujar_rectangulos_y_guardar(image_path, detections, "output_patches.jpg")
 - Una vez tengas tus archivos en el directorio actual (imagen y configuración), ejecuta:
 
 ```bash
-docker run -e CONFIG=/App/config.json -e IMAGE=/App/tu_imagen.jpg -v $(pwd):/App artzulm/aiva_2024_metalgroup:latest
+docker run -e CONFIG=/app/config.json -e IMAGE=/app/tu_imagen.jpg -v $(pwd):/App artzulm/aiva_2024_metalgroup:latest
 ```
 - Sustituye `tu_imagen.jpg` y `config.json` por los nombres de tus archivos dentro del directorio actual.
 - El contenedor procesará la imagen indicada y generará la salida en el mismo mormato que el método Python para su versión asociada, pero en un entorno aislado y controlado.
