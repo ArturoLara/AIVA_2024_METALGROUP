@@ -137,20 +137,29 @@ El archivo de configuración permite definir pipelines personalizados para cada 
 
 ### Métodos Disponibles
 
-#### Preprocesado (preprocessing.py)
-| Método | Parámetros | Descripción |
-|--------|------------|-------------|
-| **CLAHEMethod** | `clip_limit`, `grid_size` | Equalización de histograma adaptativo |
-| **BrightScratchMethod** | `contrast_enhance`, `threshold_factor` | Mejora de contraste para rayones brillantes |
-| **MorphologyMethod** | `operation`, `kernel_size` | Operaciones morfológicas (open/close/erode/dilate) |
-| **GaussianBlurMethod** | `sigma` | Suavizado gaussiano |
-| **AdaptiveThresholdMethod** | `block_size`, `C` | Umbralización adaptativa |
-
-#### Detección (detection.py)
-| Método | Parámetros | Aplicación |
-|--------|------------|------------|
-| **ScratchDetectionMethod** | `min_length`, `max_width` | Detección de rayones lineales |
-| **EnhancedConnectedComponents** | `area_min`, `area_max` | Detección de manchas por componentes conectados |
+| **Tipo**      | **Clase / Método**                        | **Parámetros**                                                                                      | **Descripción**                                               |
+|---------------|-------------------------------------------|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| Preprocesado  | `GaussianBlurMethod`                      | `sigma` (float, por defecto 1.0)                                                                   | Suavizado Gaussiano                                           |
+| Preprocesado  | `MedianBlurMethod`                        | `ksize` (int, impar, por defecto 3)                                                                | Suavizado Mediano                                             |
+| Preprocesado  | `SobelGradientMethod`                     | *(sin parámetros)*                                                                                  | Gradiente Sobel (bordes)                                      |
+| Preprocesado  | `ThresholdMethod`                         | `factor` (float, por defecto 0.2)                                                                  | Umbralización global                                          |
+| Preprocesado  | `AdaptiveThresholdMethod`                 | `block_size` (int, impar, por defecto 35), `C` (int, por defecto 5)                                | Umbralización adaptativa                                      |
+| Preprocesado  | `MorphologyMethod`                        | `operation` (str), `kernel_size` (int o tupla), `kernel_type` (por defecto MORPH_RECT)             | Operaciones morfológicas (open, close, erode, dilate)         |
+| Preprocesado  | `LocalContrastMethod`                     | `kernel_size` (int, por defecto 25), `contrast_factor` (int, por defecto 20), `offset` (int, 128)  | Realce de contraste local                                     |
+| Preprocesado  | `EnhancedPatchMethod`                     | *(sin parámetros)*                                                                                  | Pipeline especializado para manchas                           |
+| Preprocesado  | `CLAHEMethod`                             | `clip_limit` (float, por defecto 2.0), `grid_size` (tupla, por defecto (8,8))                      | Equalización adaptativa de histograma                         |
+| Preprocesado  | `DirectionalFilterMethod`                 | `orientations` (lista de int, por defecto[135]), `kernel_size` (int, por defecto 15)      | Filtrado direccional                                          |
+| Preprocesado  | `BrightScratchMethod`                     | `contrast_enhance` (float, 1.5), `threshold_factor` (float, 0.7)                                   | Realce y umbral para rayones brillantes                       |
+| Preprocesado  | `AdaptiveStatsThresholdMethod`            | `std_factor` (float, 1.5), `offset` (int, 0)                                                       | Umbralización estadística local                               |
+| Preprocesado  | `InvertMethod`                            | *(sin parámetros)*                                                                                  | Inversión de intensidades                                     |
+| Preprocesado  | `NormalizeMethod`                         | *(sin parámetros)*                                                                                  | Normalización de rango dinámico                               |
+| Preprocesado  | `UmbralizeMethod`                         | *(sin parámetros)*                                                                                  | Umbralización fija a 200                                      |
+| Preprocesado  | `CannyMethod`                             | *(sin parámetros)*                                                                                  | Detección de bordes Canny                                     |
+| Detección     | `ContrastMethod`                          | *(sin parámetros)*                                                                                  | Detección por contornos                                       |
+| Detección     | `ConnectedComponentsDetectionMethod`      | `area_min` (int, 50), `area_max` (int, 5000), `max_results` (int, 5)                               | Componentes conectados básico                                 |
+| Detección     | `EnhancedConnectedComponentsDetectionMethod` | `area_min` (200), `area_max` (20000), `max_results` (5), `border_threshold` (10), `aspect_ratio_limit` (8) | Componentes conectados avanzado                               |
+| Detección     | `ScratchDetectionMethod`                  | `min_length` (30), `max_width` (20), `max_results` (5)                                             | Detección de rayones                                          |
+| Detección     | `MultiDefectDetectionMethod`              | `scratch_detector`, `patch_detector`, `combine_results` (bool, True)                               | Combinación de detectores especializados                      |
 
 ---
 
