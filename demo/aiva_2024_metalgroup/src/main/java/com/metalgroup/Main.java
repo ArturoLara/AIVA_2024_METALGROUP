@@ -10,7 +10,7 @@ import java.util.stream.*;
 import org.apache.commons.csv.*;
 
 public class Main {
-    private static final double IOU_THRESHOLD = 0.5;
+    private static final double IOU_THRESHOLD = 0.75;
 
     public static void main(String[] args) throws Exception {
         List<DetectionResult> results = new ArrayList<>();

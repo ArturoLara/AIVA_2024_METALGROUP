@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import java.awt.Rectangle;
 
 public class DockerExecutor {
-    private static final Pattern COORD_PATTERN = Pattern.compile("\\((\\d+),(\\d+),(\\d+),(\\d+)\\)");
+    private static final Pattern COORD_PATTERN = Pattern.compile("x=(\\d+),\\s*y=(\\d+),\\s*w=(\\d+),\\s*h=(\\d+)");
 
     public static List<Rectangle> processImage(String imagePath) throws IOException, InterruptedException {
 
@@ -17,12 +17,11 @@ public class DockerExecutor {
 
         String[] command = {
                 "docker", "run",
-                "-e", "CONFIG=/App/config.json",
+                "-e", "CONFIG=/App/dataset/config.json",
                 "-e", "IMAGE=/App/dataset/" + imageName,
-                "-v", datasetPath + ":/App",
-                "artzulm/aiva_2024_metalgroup:1.0"
+                "-v", System.getProperty("user.dir") + ":/App",
+                "artzulm/aiva_2024_metalgroup:latest"
         };
-
 
         ProcessBuilder pb = new ProcessBuilder(command);
         pb.redirectErrorStream(true);
